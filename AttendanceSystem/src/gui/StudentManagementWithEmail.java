@@ -24,18 +24,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class StudentManagementWithEmail extends StudentManagement {
-    
+
     private JButton btnSendDailySummary;
     private Webcam webcam;
 
     public StudentManagementWithEmail() {
         super();
-        
+
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnSendDailySummary = new JButton("Send Daily Summary");
         footerPanel.add(btnSendDailySummary);
         add(footerPanel, BorderLayout.SOUTH);
-        
+
         btnSendDailySummary.addActionListener(this::sendDailySummary);
         setupScanButtonWithEmail();
     }

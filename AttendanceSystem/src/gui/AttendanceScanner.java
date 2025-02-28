@@ -22,6 +22,8 @@ public class AttendanceScanner extends JFrame {
         JLabel lblPath = new JLabel("QR Code Path:");
         txtQRCodePath = new JTextField(20);
         btnScan = new JButton("Scan");
+        btnScan.setBackground(new Color(0, 102, 204)); // Blue background
+        btnScan.setForeground(Color.WHITE); // White text
 
         add(lblPath);
         add(txtQRCodePath);
@@ -32,12 +34,14 @@ public class AttendanceScanner extends JFrame {
                 scanAndRecordAttendance();
             }
         });
+
+        getContentPane().setBackground(new Color(240, 240, 240)); // Light gray background
     }
 
     private void scanAndRecordAttendance() {
         String filePath = txtQRCodePath.getText();
         String scannedText = QRCodeScanner.scanQRCodeFromFile(filePath);
-        
+
         if (scannedText != null) {
             try {
                 Connection conn = DatabaseConnection.connect();

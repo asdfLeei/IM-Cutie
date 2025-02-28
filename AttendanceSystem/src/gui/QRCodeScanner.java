@@ -1,12 +1,15 @@
 package gui;
 
 import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamPanel;
+import com.github.sarxos.webcam.WebcamResolution;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
 import javax.imageio.ImageIO;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +25,7 @@ public class QRCodeScanner {
             System.err.println("Error: No webcam detected!");
             return;
         }
-        webcam.setViewSize(new Dimension(640, 480));
+        webcam.setViewSize(WebcamResolution.VGA.getSize());
         webcam.open();
         executor = Executors.newSingleThreadExecutor();
     }
@@ -33,23 +36,28 @@ public class QRCodeScanner {
             return;
         }
 
-        executor.execute(() -> {
-            while (true) {
-                try {
-                    BufferedImage image;
-                    do {
-                        image = webcam.getImage();
-                        if (image == null) {
-                            System.out.println("Waiting for webcam image...");
-                            Thread.sleep(500);
-                        }
-                    } while (image == null);
+        // Create a JFrame to display the webcam feed
+        JFrame frame = new JFrame("QR Code Scanner");
+        WebcamPanel panel = new WebcamPanel(webcam);
+        panel.setMirrored(true);
+        frame.add(panel);
+        frame.setSize(640, 480);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null); // Center the window
+        frame.setVisible(true);
 
-                    String result = decodeQRCode(image);
-                    if (result != null) {
-                        System.out.println("QR Code Scanned: " + result);
-                        processAttendance(result);
-                        break;
+        executor.execute(() -> {
+            while (frame.isVisible()) {
+                try {
+                    BufferedImage image = webcam.getImage();
+                    if (image != null) {
+                        String result = decodeQRCode(image);
+                        if (result != null) {
+                            System.out.println("QR Code Scanned: " + result);
+                            processAttendance(result);
+                            frame.dispose(); // Close the window after scanning
+                            break;
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -66,7 +74,7 @@ public class QRCodeScanner {
             Result result = new MultiFormatReader().decode(bitmap);
             return result.getText();
         } catch (NotFoundException e) {
-            return null; 
+            return null;
         }
     }
 

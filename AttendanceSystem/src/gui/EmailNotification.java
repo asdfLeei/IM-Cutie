@@ -7,7 +7,7 @@ import javax.mail.internet.*;
 public class EmailNotification {
     private static final String FROM_EMAIL = "dump083004@gmail.com"; // Change to your sender email
     private static final String PASSWORD = "esmh zfwl lrft tsmo"; // Use an app password for Gmail
-    private static final String TO_EMAIL = "leitorres030@gmail.com";
+    private static final String TO_EMAIL = "estano.jake.r@gmail.com";
     
     /**
      * Sends an email notification when a student's attendance is recorded
