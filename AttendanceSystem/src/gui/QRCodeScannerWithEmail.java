@@ -26,28 +26,29 @@ public class QRCodeScannerWithEmail {
                 System.err.println("Error: Could not connect to database.");
                 return false;
             }
-            
+
             String sql = "SELECT id, name FROM students WHERE id = ? OR ? LIKE CONCAT('SR-', LPAD(id, 6, '0'))";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, qrContent);
             stmt.setString(2, qrContent);
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 int studentId = rs.getInt("id");
                 String studentName = rs.getString("name");
                 String srCode = "SR-" + String.format("%06d", studentId);
-                
+
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 String formattedTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp);
-                
+
                 String insertSql = "INSERT INTO attendance (student_id, timestamp) VALUES (?, ?)";
                 PreparedStatement insertStmt = conn.prepareStatement(insertSql);
                 insertStmt.setInt(1, studentId);
                 insertStmt.setTimestamp(2, timestamp);
                 insertStmt.executeUpdate();
-                
-                EmailNotification.sendAttendanceNotification(studentName, srCode, formattedTimestamp);
+
+                // Send email notification for check-in
+                EmailNotification.sendAttendanceNotification(studentName, srCode, formattedTimestamp, true); // true = check-in
                 return true;
             } else {
                 System.err.println("No student found for QR content: " + qrContent);

@@ -141,13 +141,49 @@ public class StudentManagementWithEmail extends StudentManagement {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                int studentId = rs.getInt("id");
                 String studentName = rs.getString("name");
                 String srCode = rs.getString("sr_code");
-                JOptionPane.showMessageDialog(this, "Attendance recorded for: " + studentName);
 
-                // Send email notification
-                String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                EmailNotification.sendAttendanceNotification(studentName, srCode, timestamp);
+                // Check if the student has already checked in today
+                String checkSql = "SELECT id, check_in_time, check_out_time FROM attendance " +
+                                  "WHERE student_id = ? AND DATE(check_in_time) = CURDATE()";
+                PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+                checkStmt.setInt(1, studentId);
+                ResultSet checkRs = checkStmt.executeQuery();
+
+                if (checkRs.next()) {
+                    // Student has already checked in
+                    Timestamp checkOutTime = checkRs.getTimestamp("check_out_time");
+                    if (checkOutTime == null) {
+                        // Update the check-out time
+                        String updateSql = "UPDATE attendance SET check_out_time = CURRENT_TIMESTAMP WHERE id = ?";
+                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                        updateStmt.setInt(1, checkRs.getInt("id"));
+                        updateStmt.executeUpdate();
+
+                        JOptionPane.showMessageDialog(this, "Check-out recorded for: " + studentName);
+
+                        // Send email notification for check-out
+                        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                        EmailNotification.sendAttendanceNotification(studentName, srCode, timestamp, false); // false = check-out
+                    } else {
+                        // Student has already checked out
+                        JOptionPane.showMessageDialog(this, "You have already checked out for today.");
+                    }
+                } else {
+                    // Insert a new check-in record
+                    String insertSql = "INSERT INTO attendance (student_id, check_in_time) VALUES (?, CURRENT_TIMESTAMP)";
+                    PreparedStatement insertStmt = conn.prepareStatement(insertSql);
+                    insertStmt.setInt(1, studentId);
+                    insertStmt.executeUpdate();
+
+                    JOptionPane.showMessageDialog(this, "Check-in recorded for: " + studentName);
+
+                    // Send email notification for check-in
+                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    EmailNotification.sendAttendanceNotification(studentName, srCode, timestamp, true); // true = check-in
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "No student found for QR code: " + qrContent);
             }
