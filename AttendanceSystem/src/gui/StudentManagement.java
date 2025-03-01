@@ -5,8 +5,8 @@ import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamPanel;
 import com.github.sarxos.webcam.WebcamResolution;
 import com.google.zxing.*;
-import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -41,12 +41,12 @@ public class StudentManagement extends JFrame {
         // Create main panel with BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(240, 240, 240)); // Light gray background
+        mainPanel.setBackground(new Color(0x748D92)); // Match LoginPage background
 
         // Create form panel for student information
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(BorderFactory.createTitledBorder("Student Information"));
-        formPanel.setBackground(Color.WHITE); // White background
+        formPanel.setBackground(new Color(0x748D92)); // Match LoginPage background
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -54,26 +54,42 @@ public class StudentManagement extends JFrame {
         // Student Name
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Student Name:"), gbc);
+        JLabel lblName = new JLabel("Student Name:");
+        lblName.setForeground(new Color(0x124E66)); // Dark blue-green text
+        formPanel.add(lblName, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         txtName = new JTextField(25);
         txtName.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtName.setBackground(new Color(0xD3D9D4)); // Light gray background
+        txtName.setForeground(new Color(51, 51, 51)); // Dark gray text
+        txtName.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(204, 204, 204)), // Light gray border
+                BorderFactory.createEmptyBorder(5, 10, 5, 10) // Padding
+        ));
         formPanel.add(txtName, gbc);
 
-        // SR-Code (editable)
+        // SR-Code
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
-        formPanel.add(new JLabel("SR-Code:"), gbc);
+        JLabel lblSRCode = new JLabel("SR-Code:");
+        lblSRCode.setForeground(new Color(0x124E66)); // Dark blue-green text
+        formPanel.add(lblSRCode, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         txtSRCode = new JTextField(25);
         txtSRCode.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtSRCode.setBackground(new Color(0xD3D9D4)); // Light gray background
+        txtSRCode.setForeground(new Color(51, 51, 51)); // Dark gray text
+        txtSRCode.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(204, 204, 204)), // Light gray border
+                BorderFactory.createEmptyBorder(5, 10, 5, 10) // Padding
+        ));
         formPanel.add(txtSRCode, gbc);
 
         // Find Student Button
@@ -95,7 +111,7 @@ public class StudentManagement extends JFrame {
         // QR Code Operations Panel
         JPanel qrPanel = new JPanel(new BorderLayout(10, 10));
         qrPanel.setBorder(BorderFactory.createTitledBorder("QR Code Operations"));
-        qrPanel.setBackground(Color.WHITE); // White background
+        qrPanel.setBackground(new Color(0x748D92)); // Match LoginPage background
 
         // QR Code Buttons Panel
         JPanel qrButtonsPanel = new JPanel(new GridLayout(1, 3, 10, 0));
@@ -116,6 +132,7 @@ public class StudentManagement extends JFrame {
         qrDisplayPanel.setBorder(BorderFactory.createEtchedBorder());
         lblQRCode = new JLabel("QR Code will be displayed here", SwingConstants.CENTER);
         lblQRCode.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblQRCode.setForeground(new Color(0x124E66)); // Dark blue-green text
         qrDisplayPanel.add(lblQRCode, BorderLayout.CENTER);
         qrPanel.add(qrDisplayPanel, BorderLayout.CENTER);
 
@@ -136,22 +153,13 @@ public class StudentManagement extends JFrame {
 
     private void styleButton(JButton button) {
         button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setBackground(new Color(0, 102, 204)); // Blue background
-        button.setForeground(Color.BLACK); // White text
+        button.setBackground(new Color(0x124E66)); // Dark blue-green background
+        button.setForeground(Color.WHITE); // White text
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(0, 153, 255)); // Lighter blue on hover
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(0, 102, 204)); // Original blue on exit
-            }
-        });
+        button.setOpaque(true); // Ensure the button is opaque
+        button.setBorderPainted(false); // Disable border painting
     }
 
     private void openQRCodeFile() {

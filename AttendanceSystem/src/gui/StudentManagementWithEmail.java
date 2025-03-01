@@ -31,13 +31,28 @@ public class StudentManagementWithEmail extends StudentManagement {
     public StudentManagementWithEmail() {
         super();
 
+        // Footer panel for the "Send Daily Summary" button
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        footerPanel.setBackground(new Color(0x748D92)); // Match LoginPage background
+
         btnSendDailySummary = new JButton("Send Daily Summary");
+        styleButton(btnSendDailySummary); // Apply custom button style
         footerPanel.add(btnSendDailySummary);
         add(footerPanel, BorderLayout.SOUTH);
 
         btnSendDailySummary.addActionListener(this::sendDailySummary);
         setupScanButtonWithEmail();
+    }
+
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(0x124E66)); // Dark blue-green background
+        button.setForeground(Color.WHITE); // White text
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true); // Ensure the button is opaque
+        button.setBorderPainted(false); // Disable border painting
     }
 
     private void setupScanButtonWithEmail() {
