@@ -25,22 +25,22 @@ import java.util.Date;
 
 public class StudentManagementWithEmail extends StudentManagement {
 
-    private JButton btnSendDailySummary;
+    private JButton btnViewReports;
     private Webcam webcam;
 
     public StudentManagementWithEmail() {
         super();
 
-        // Footer panel for the "Send Daily Summary" button
+        // Footer panel for the "View Reports" button
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footerPanel.setBackground(new Color(0x748D92)); // Match LoginPage background
 
-        btnSendDailySummary = new JButton("Send Daily Summary");
-        styleButton(btnSendDailySummary); // Apply custom button style
-        footerPanel.add(btnSendDailySummary);
+        btnViewReports = new JButton("View Reports");
+        styleButton(btnViewReports); // Apply custom button style
+        footerPanel.add(btnViewReports);
         add(footerPanel, BorderLayout.SOUTH);
 
-        btnSendDailySummary.addActionListener(this::sendDailySummary);
+        btnViewReports.addActionListener(this::viewReports);
         setupScanButtonWithEmail();
     }
 
@@ -139,7 +139,7 @@ public class StudentManagementWithEmail extends StudentManagement {
     private void processQRCode(String qrContent) {
         try (Connection conn = DatabaseConnection.connect()) {
             // Query to find a student by either id or sr_code
-            String sql = "SELECT id, name, sr_code FROM students WHERE id = ? OR sr_code = ?";
+            String sql = "SELECT id, name, sr_code, profile_picture FROM students WHERE id = ? OR sr_code = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             // Try to parse the QR content as an integer (for student_id)
@@ -159,6 +159,10 @@ public class StudentManagementWithEmail extends StudentManagement {
                 int studentId = rs.getInt("id");
                 String studentName = rs.getString("name");
                 String srCode = rs.getString("sr_code");
+                String profilePicturePath = rs.getString("profile_picture");
+
+                // Display the student's profile
+                displayStudentProfile(studentName, srCode, profilePicturePath);
 
                 // Check if the student has already checked in today
                 String checkSql = "SELECT id, check_in_time, check_out_time FROM attendance " +
@@ -207,15 +211,60 @@ public class StudentManagementWithEmail extends StudentManagement {
             JOptionPane.showMessageDialog(this, "Error processing QR code: " + ex.getMessage());
         }
     }
+    
+    private void displayStudentProfile(String studentName, String srCode, String profilePicturePath) {
+        JDialog profileDialog = new JDialog(this, "Student Profile", true);
+        profileDialog.setSize(300, 400);
+        profileDialog.setLocationRelativeTo(this);
+        profileDialog.setLayout(new BorderLayout(10, 10));
 
-    private void sendDailySummary(ActionEvent e) {
-        try {
-            QRCodeScannerWithEmail.sendDailyAttendanceSummary();
-            JOptionPane.showMessageDialog(this, "Daily attendance summary email sent successfully!");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error sending daily summary: " + ex.getMessage());
+        // Panel to hold the profile picture
+        JPanel picturePanel = new JPanel(new BorderLayout());
+        picturePanel.setBackground(new Color(0x748D92)); // Match the system theme
+
+        // Load the profile picture
+        if (profilePicturePath != null && !profilePicturePath.isEmpty()) {
+            try {
+                ImageIcon profileIcon = new ImageIcon(profilePicturePath);
+                Image image = profileIcon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                JLabel pictureLabel = new JLabel(new ImageIcon(image));
+                pictureLabel.setHorizontalAlignment(JLabel.CENTER);
+                picturePanel.add(pictureLabel, BorderLayout.CENTER);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JLabel errorLabel = new JLabel("Error loading profile picture", SwingConstants.CENTER);
+                picturePanel.add(errorLabel, BorderLayout.CENTER);
+            }
+        } else {
+            JLabel noPictureLabel = new JLabel("No profile picture available", SwingConstants.CENTER);
+            picturePanel.add(noPictureLabel, BorderLayout.CENTER);
         }
+
+        // Panel to hold the name and SR-Code
+        JPanel infoPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        infoPanel.setBackground(new Color(0x748D92)); // Match the system theme
+
+        JLabel nameLabel = new JLabel("Name: " + studentName, SwingConstants.CENTER);
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        nameLabel.setForeground(Color.WHITE);
+
+        JLabel srCodeLabel = new JLabel("SR-Code: " + srCode, SwingConstants.CENTER);
+        srCodeLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        srCodeLabel.setForeground(Color.WHITE);
+
+        infoPanel.add(nameLabel);
+        infoPanel.add(srCodeLabel);
+
+        // Add panels to the dialog
+        profileDialog.add(picturePanel, BorderLayout.CENTER);
+        profileDialog.add(infoPanel, BorderLayout.SOUTH);
+
+        // Show the dialog
+        profileDialog.setVisible(true);
+    }
+
+    private void viewReports(ActionEvent e) {
+        new ReportsInterface().setVisible(true);
     }
 
     public static void main(String[] args) {
